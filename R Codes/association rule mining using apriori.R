@@ -6,7 +6,7 @@ library('arules')
 #data("mtcars")
 
 #reading the data
-dat<-read.csv("../swarup/Desktop/adult_umlaut.csv",encoding = "UTF-8")
+dat<-read.csv("~/Desktop/adult_umlaut.csv",encoding = "UTF-8")
 
 #making the data into factor type
 dat<-as.data.frame(sapply(dat,as.factor))
@@ -16,11 +16,8 @@ dat1<-as(dat,"transactions")
 lhs1<-dat1@itemInfo$labels[dat1@itemInfo$variables!="income"]
 rhs1<-dat1@itemInfo$labels[dat1@itemInfo$variables=="income"]
 
-#generating all the rules that gave a target and confidence greater than some specified values
-s10<-apriori(dat1,parameter = list(supp = 0.1, conf = 0, target = "rules",minlen=1,maxlen=4,ext=TRUE),appearance = list(lhs=lhs1,default="none") )
-
 #Calclulating all the item sets with support>0.001
-s1<-apriori(dat,parameter = list(support = 0.001, target = "frequent",maxlen=3),appearance = list(items=sample(lhs1,round(length(lhs1)/2,0)),default="none") )
+s1<-apriori(dat,parameter = list(support = 0.001, target = "frequent",maxlen=5),appearance = list(items=sample(lhs1,round(length(lhs1),0)),default="none") )
 
 #Defining the rhs
 s2<-apriori(dat,parameter = list(support = 0, target = "frequent",maxlen=1),appearance = list(items=rhs1,default="none") )
@@ -33,8 +30,8 @@ ruleSet<-c(ruleSet,ruleSet2)
 #Generating  the rule parameters
 system.time(df<-as.data.frame(list(support=interestMeasure(x = ruleSet,measure = "support",transactions = dat1),
                        confidence=interestMeasure(x = ruleSet,measure = "confidence",transactions = dat1),
-                       lift=s1@quality$support,
-                       lhs.support=coverage(x = ruleSet,transactions = dat1))))
+                       lift=interestMeasure(x = ruleSet,measure = "lift",transactions = dat1),
+                       lhs.support=s1@quality$support)))
 ruleSet@quality<-df
 
 #Fomating the output
